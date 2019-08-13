@@ -1,0 +1,170 @@
+﻿
+@{
+    ViewBag.Title = "CriarQuery";
+}
+
+<h2>CriarQuery</h2> <button type="button" onclick="Enviar();">Enviar</button>
+
+@*<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" />*@
+<script src="~/Scripts/jquery%20v2.1.1.js"></script>
+
+<script>
+    var i = 0;
+
+    function addNewRow(count) {
+        var newrow =
+        '<tr id="row' + count + '">' +
+          '<td><input id="linha' + count + '_coluna0" name="Solicitacao[' + i + '].RESolicitante"></td>' +
+          '<td><input id="linha' + count + '_coluna1" name="Solicitacao[' + i + '].REFuncionario"></td>' +
+          '<td><input id="linha' + count + '_coluna2" name="Solicitacao[' + i + '].PeriodoAquisitivo"></td>' +
+          '<td><input id="linha' + count + '_coluna3" name="Solicitacao[' + i + '].DataInicio"></td>' +
+          '<td><input id="linha' + count + '_coluna4" name="Solicitacao[' + i + '].QuantidadeDias"></td>' +
+          '</tr>'
+
+        i++;
+
+        return newrow;
+    }
+
+    function Cola() {
+        $('table').on('paste', 'input', function (e) {
+            var $this = $(this);
+            $.each(e.originalEvent.clipboardData.items, function (i, v) {
+                if (v.type === 'text/plain') {
+                    v.getAsString(function (text) {
+                        var x = $this.closest('td').index();
+                        var y = $this.closest('tr').index();
+
+                        obj = {};
+                        text = text.trim('\r\n');
+
+                        var contaLinha = 0;
+                        $("#row").remove();
+                        $.each(text.split('\r\n'), function (i2, v2) {
+                            $("#tabela").append(addNewRow(contaLinha));
+
+                            var contaColuna = 0;
+                            $.each(v2.split('\t'), function (i3, v3) {
+                                var row = y + i2, col = x + i3;
+                                obj['cell-' + row + '-' + col] = v3;
+
+                                $('#linha' + contaLinha + '_coluna' + contaColuna).val(v3);
+
+                                //$this.closest('table').find('tr:eq('+row+') td:eq('+col+') input').val(v3);
+                                contaColuna++;
+                            });
+
+                            contaLinha++;
+                        });
+
+                    });
+                }
+            });
+            return false;
+
+        });
+    }
+</script>
+<div id="container">
+    <form id="test">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30px;">RESolicitante</th>
+                    <th style="width: 30px;">REFuncionario</th>
+                    <th style="width: 30px;">PeriodoAquisitivo</th>
+                    <th style="width: 30px;">DataInicio</th>
+                    <th style="width: 30px;">QuantidadeDias</th>
+                </tr>
+            </thead>
+            <tbody id="tabela">
+                <tr id="row">
+                    <td style="width: 30px;"><input id=""></td>
+                    <td style="width: 30px;"><input id=""></td>
+                    <td style="width: 30px;"><input id=""></td>
+                    <td style="width: 30px;"><input id=""></td>
+                    <td style="width: 30px;"><input id=""></td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<!-- SCRIPT PARA COLAGEM (ctrl+c ctrl+v) DINĂ‚MICA -->
+<script type="text/javascript">
+    $('table').on('paste', 'input', function (e) {
+        var $this = $(this);
+        $.each(e.originalEvent.clipboardData.items, function (i, v) {
+            if (v.type === 'text/plain') {
+                v.getAsString(function (text) {
+                    var x = $this.closest('td').index();
+                    var y = $this.closest('tr').index();
+
+                    obj = {};
+                    text = text.trim('\r\n');
+
+                    var contaLinha = 0;
+                    $("#row").remove();
+                    $.each(text.split('\r\n'), function (i2, v2) {
+                        $("#tabela").append(addNewRow(contaLinha));
+
+                        var contaColuna = 0;
+                        $.each(v2.split('\t'), function (i3, v3) {
+                            var row = y + i2, col = x + i3;
+                            obj['cell-' + row + '-' + col] = v3;
+
+                            $('#linha' + contaLinha + '_coluna' + contaColuna).val(v3);
+
+                            //$this.closest('table').find('tr:eq('+row+') td:eq('+col+') input').val(v3);
+                            contaColuna++;
+                        });
+
+                        contaLinha++;
+                    });
+
+                });
+            }
+        });
+        return false;
+
+    });
+
+    function Enviar() {
+
+        var Solicitacao = [];
+        
+        $('#tabela tr').each(function (index, tr) {
+            let obj = new Object();
+
+            obj.RESolicitante = $(tr).children().eq(0).find('input').val();
+            obj.REFuncionario = $(tr).children().eq(1).find('input').val();
+            obj.PeriodoAquisitivo = $(tr).children().eq(2).find('input').val();
+            obj.DataInicio = $(tr).children().eq(3).find('input').val();
+            obj.QuantidadeDias = $(tr).children().eq(4).find('input').val();
+            Solicitacao.push(obj);
+        });
+
+        $.ajax({
+            type: 'POST',
+            url: "/Home/CriarQueryJson",
+            //datatype: "json",
+            //contenttype: "application/json; charset=utf-8",
+            data: $("#test").serialize(),
+            success: function (resultado) {
+                console.log(resultado);
+            }
+        });
+    }
+</script>
+
+<!-- PARA ADICIONAR NOVA LINHA (DESCONSIDERA)-->
+<script type="text/javascript">
+    var count = 1;
+    $("#btn").click(function () {
+
+        $("#minhaTabela").appendTo(addNewRow(count));
+        count++;
+    });
+
+
+</script>
